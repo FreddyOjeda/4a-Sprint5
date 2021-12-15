@@ -9,8 +9,9 @@
         <button class="btn btn-one" v-if="!is_auth" v-on:click="loadLogin" > Iniciar Sesion</button>
         <button class="btn btn-one" v-if="!is_auth" v-on:click="loadSignUp" > Crear Cuenta</button>
         <button v-if="is_auth" v-on:click="loadHome" > Inicio </button>
+        <button v-if="is_auth && is_admin=='True'" v-on:click="loadPublication"> CRUD Productos </button>
+        <button v-if="is_auth" v-on:click="loadPublication"> Carrito </button>
         <button v-if="is_auth" v-on:click="logOut"> Cerrar Sesión </button>
-        <button v-if="is_auth" v-on:click="loadPublication"> Publicacion </button>
         <!--<button v-if="is_auth" v-on:click="loadVecinos"> Tus Vecinos </button>
         <button v-if="is_auth" v-on:click="loadUpdate"> Configuracion </button>
         <button v-if="is_auth" v-on:click="loadAccount"> Cuenta </button>
@@ -46,7 +47,9 @@ export default{
 
   data: function(){
     return{
-      is_auth: false
+      is_auth: false,
+      is_admin: false,
+      Superuser:""
 }
 },
   components: {
@@ -54,9 +57,28 @@ export default{
   },
 
   methods:{
-    verifyAuth: function() {
-    if(this.is_auth == false)
-    this.$router.push({name: "logIn"})
+    verifyAuth: function(userId,token) {
+      
+    this.is_auth = localStorage.getItem("isAuth") || false;
+    //let token = localStorage.getItem("token_access");
+    console.log("id",userId)
+    //let userId = jwt_decode(token).user_id.toString();
+      axios.get(`http://127.0.0.1:8000/detail_user/${userId}/`, {headers: {'Authorization': `Bearer ${token}`}})
+
+            .then((result) => {
+                Superuser=result.data.username;
+                console.log(Superuser)
+                })
+            .catch(() => {
+                 console.log("fallo")
+            });
+    this.is_admin = this.Superuser.superuser;
+
+      if (this.is_auth == false)
+        this.$router.push({ name: "logIn" });
+      else
+        //this.$router.push({ name: "home" });
+        this.loadHome();
     },
     loadLogin(){
       this.$router.push({name: "logIn"})
@@ -64,8 +86,30 @@ export default{
     loadSignUp: function(){
       this.$router.push({name: "signUp"})
     },
-    completedLogIn: function(data) {},
-    completedSignUp: function(data) {},
+    completedLogIn: function(data) {
+      localStorage.setItem("isAuth", true);
+      localStorage.setItem("username", data.username);
+      localStorage.setItem("token_access", data.token_access);
+      localStorage.setItem("token_refresh", data.token_refresh);
+      let token = localStorage.getItem("token_access");
+      let userId = jwt_decode(token).user_id.toString();
+      Swal.fire("Autenticación Exitosa");
+      //console.log("puta")
+      
+      this.verifyAuth(userId,token);
+    },
+    completedSignUp: function(data) {
+      Swal.fire("Registro Exitoso");
+      this.completedLogIn(data);
+    },
+    loadHome: function() {
+      this.$router.push({ name: "home" });
+    },
+    logOut: function () {
+      localStorage.clear();
+      Swal.fire("Sesión Cerrada");
+      this.verifyAuth();
+    },
 },
   created: function(){
     this.verifyAuth()

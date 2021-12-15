@@ -10,10 +10,10 @@
                 <input type="email" v-model="user.email" placeholder="Email">
                 <br>
 
-                <input type="number" v-model="user.celular" placeholder="Celular">
+                <input type="number" v-model="user.telefono" placeholder="Celular">
                 <br>
 
-                <input type="text" v-model="user.name" placeholder="Direccion">
+                <input type="text" v-model="user.direccion" placeholder="Direccion">
                 <br>
 
                 <input type="password" v-model="user.password" placeholder="Contraseña">
@@ -28,6 +28,7 @@
 <script>
 import axios from 'axios';
 import gql from "graphql-tag";
+import Swal from 'sweetalert2';
 
 export default {
     name: "SignUp",
@@ -36,16 +37,39 @@ export default {
         return {
             user: {
                 username: "",
-                name: "",
-                celular: "",
                 email: "",
+                telefono: "",
                 direccion:"",
                 password: "",
+                superuser:"",
             }
         }
     },
 
     methods: {
+        processSignUp: function(){
+            console.log(this.user)
+            axios.post(
+                "http://127.0.0.1:8000/create_user/",
+                this.user,
+                {headers: {}}
+            )
+                .then((result) => {
+                    let dataSignUp = {
+                        username: this.user.username,
+                        token_access: result.data.access,
+                        token_refresh: result.data.refresh,
+                    }
+                    this.$emit('completedSignUp', dataSignUp)
+                })
+                .catch((error) => {
+                    Swal.fire(this.user.username);
+                    Swal.fire("ERROR: Fallo en el registro.");
+
+                });
+        }
+    }
+    /*methods: {
         processSignUp: function(){
             await this.$apollo
         .mutate({
@@ -74,7 +98,7 @@ export default {
           alert("ERROR: Fallo en el registro.");
         });
         }
-    }
+    }*/
 }
 </script>
 

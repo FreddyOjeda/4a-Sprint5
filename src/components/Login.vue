@@ -35,7 +35,32 @@ export default {
     },
 
     methods: {
-        processLogInUser: function(){
+      processLogInUser: function(){
+            axios.post(
+                "http://127.0.0.1:8000/login/",
+                this.user,
+                {headers: {}}
+                )
+                .then((result) => {
+                    let dataLogIn = {
+                        username: this.user.username,
+                        token_access: result.data.access,
+                        token_refresh: result.data.refresh,
+                    }
+                    const alerta = () => {Swal.fire("Autenticación Exitosa");}
+                    this.$emit('completedLogIn', dataLogIn)
+                })
+                .catch((error) => {
+                    
+                    if (error.response.status == "401")
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Oops...',
+                            text: 'Error 401: Credenciales incorrectas',
+                        })
+                });
+        }
+        /*processLogInUser: function(){
             await this.$apollo
         .mutate({
           mutation: gql`
@@ -62,7 +87,7 @@ export default {
         .catch((error) => {
           alert("ERROR 401: Credenciales Incorrectas.");
         });
-        }
+        }*/
     }
 }
 </script>
