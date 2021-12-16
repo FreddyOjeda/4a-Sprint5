@@ -63,7 +63,7 @@ export default{
     //let token = localStorage.getItem("token_access");
     console.log("id",userId)
     //let userId = jwt_decode(token).user_id.toString();
-      axios.get(`http://127.0.0.1:8000/detail_user/${userId}/`, {headers: {'Authorization': `Bearer ${token}`}})
+      axios.get(`https://vitrineando-ms2.herokuapp.com/detail_user/${userId}/`, {headers: {'Authorization': `Bearer ${token}`}})
 
             .then((result) => {
                 Superuser=result.data.username;

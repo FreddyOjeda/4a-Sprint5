@@ -50,7 +50,7 @@ export default {
         processSignUp: function(){
             console.log(this.user)
             axios.post(
-                "http://127.0.0.1:8000/create_user/",
+                "https://vitrineando-ms2.herokuapp.com/create_user/",
                 this.user,
                 {headers: {}}
             )
